@@ -18,11 +18,7 @@ public class AutoRunner {
     private AutoSequence[] availableSequences = {
         // list of all available sequences
         new TestSequence(), 
-        new AutoLineSequence(), 
-        new BigBallSequence(), 
-        new SmallBallSequence(), 
-        new SmallBigBallSequence(), 
-        new SpinForWinz()
+        new AutoLineSequence()
     };
 
     public AutoRunner() {

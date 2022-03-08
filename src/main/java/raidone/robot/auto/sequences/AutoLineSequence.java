@@ -5,10 +5,10 @@ import java.util.Arrays;
 import raidone.robot.auto.actions.LambdaAction;
 import raidone.robot.auto.actions.SeriesAction;
 import raidone.robot.auto.actions.SimpleMove;
-import raidone.robot.submodules.Intake;
+import raidone.robot.submodules.SubsystemX;
 
 public class AutoLineSequence extends AutoSequence {
-    private final Intake intake = Intake.getInstance();
+    private final SubsystemX intake = SubsystemX.getInstance();
 
     public AutoLineSequence() {}
 

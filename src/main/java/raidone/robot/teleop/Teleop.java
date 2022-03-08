@@ -4,11 +4,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import raidone.robot.Constants;
 import raidone.robot.submodules.Chassis;
-import raidone.robot.submodules.EZClimb;
-import raidone.robot.submodules.Intake;
+import raidone.robot.submodules.SubsystemX;
 import raidone.robot.submodules.Chassis.GearShift;
-import raidone.robot.submodules.EZClimb.EZClimbState;
-import raidone.robot.submodules.Intake.IntakeState;
 
 public class Teleop {
 
@@ -28,8 +25,7 @@ public class Teleop {
     private XboxController partner = new XboxController(1);
 
     private static Chassis chassis = Chassis.getInstance();
-    private static Intake intake = Intake.getInstance();
-    private static EZClimb climb = EZClimb.getInstance();
+    private static SubsystemX intake = SubsystemX.getInstance();
 
     /**
      * Runs at the start of teleop.
@@ -43,21 +39,22 @@ public class Teleop {
     /**
      * Continuously loops in teleop.
      */
+    public void onLoop() {
+        masterLoop();
+        partnerLoop();
+    }
+
     boolean shiftState = false, prevShiftState = false, driveState = false, prevDriveState = false, switchFront = false, prevSwitchFront = false;
-    // int drive = 0;
     boolean shift = false;
     int val = 1;
-    // String message = "";
-    public void onLoop() {
+    private void masterLoop() {
         double leftY = master.getLeftY() * val * 0.9;
         switchFront = master.getRightStickButton();
         if(switchFront && !prevSwitchFront) {
             val *= -1;
         }
         prevSwitchFront = switchFront;
-        chassis.curvatureDrive(leftY, -master.getRightX(), Math.abs(master.getLeftY()) < Constants.DEADBAND);
-        // chassis.tankDrive(master.getLeftY(), master.getRightY());
-        
+        chassis.curvatureDrive(leftY, -master.getRightX(), Math.abs(master.getLeftY()) < Constants.DEADBAND);        
 
         shiftState = master.getLeftBumper() || partner.getAButton();
         if(shiftState && !prevShiftState) {
@@ -71,44 +68,12 @@ public class Teleop {
         prevShiftState = shiftState;
         SmartDashboard.putString("Shift state", shift ? "low torque" : "high torque");
 
-        // driveState = master.getAButton();
-        // if(driveState && !prevDriveState) {
-        //     drive++;
-        // }
-        // switch(drive %= 3) {
-        //     case 0: 
-        //         chassis.curvatureDrive(-master.getRawAxis(1), master.getRawAxis(4), Math.abs(master.getRawAxis(1)) < Constants.DEADBAND);
-        //         message = "Curvature Drive";
-        //         break;
-        //     case 1:
-        //         chassis.tankDrive(-master.getRawAxis(1), -master.getRawAxis(5));
-        //         message = "Tank Drive";
-        //         break;
-        //     case 2:
-        //         chassis.arcadeDrive(-master.getRawAxis(1), master.getRawAxis(4));
-        //         message = "Arcade Drive";
-        //         break;
-        // }
-        // prevDriveState = driveState;
-        // SmartDashboard.putString("Drive type", message);
-
         SmartDashboard.putNumber("x pose", chassis.getPeriodicIO().x);
         SmartDashboard.putNumber("y pose", chassis.getPeriodicIO().y);
         SmartDashboard.putNumber("rotation", chassis.getPeriodicIO().rotation.getDegrees());
+    }
 
-        if(master.getStartButton()) {
-            climb.setState(EZClimbState.UP);
-        } else {
-            climb.setState(EZClimbState.DOWN);
-        }
+    private void partnerLoop() {
 
-        /** Shift */
-        if(master.getRightBumper()) {
-            climb.setSpeed(master.getLeftTriggerAxis());
-        } else {
-            intake.autoSet(master.getRightTriggerAxis() - master.getLeftTriggerAxis());
-        }
-        intake.setState(partner.getLeftBumper() || partner.getRightBumper() ? IntakeState.DOWN : IntakeState.UP);
-        intake.setPercentSpeed(partner.getRightTriggerAxis() - partner.getLeftTriggerAxis());
     }
 }

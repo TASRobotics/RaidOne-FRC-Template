@@ -63,7 +63,7 @@ public class Chassis extends Submodule {
         OPEN_LOOP, PATH_FOLLOWING
     }
 
-    /** Motors */
+    /** Motors (THIS IS ASSUMING THAT YOU ARE USING 2 TALONS & 4 VICTORS)*/
     private final LogicalTalonSRX mLeftLeader = new LogicalTalonSRX(ChassisConstants.LEFT_LEADER_ID);
     private final WPI_VictorSPX mLeftFollowerA = new WPI_VictorSPX(ChassisConstants.LEFT_FOLLOWER_A_ID);
     private final WPI_VictorSPX mLeftFollowerB = new WPI_VictorSPX(ChassisConstants.LEFT_FOLLOWER_B_ID);
@@ -121,7 +121,7 @@ public class Chassis extends Submodule {
         mRightFollowerA.follow(mRightLeader);
         mRightFollowerB.follow(mRightLeader);
 
-        /** Inverts motors */
+        /** Inverts motors (CUSTOMIZE) */
         mLeftLeader.setInverted(true);
         mLeftFollowerA.setInverted(InvertType.FollowMaster);
         mLeftFollowerB.setInverted(InvertType.FollowMaster);
@@ -129,7 +129,7 @@ public class Chassis extends Submodule {
         mRightFollowerA.setInverted(InvertType.FollowMaster);
         mRightFollowerB.setInverted(InvertType.FollowMaster);
 
-        /** Inverts encoder */
+        /** Inverts encoder (CUSTOMIZE) */
         mRightLeader.setSensorPhase(false);
         mLeftLeader.setSensorPhase(false);
 
@@ -163,12 +163,12 @@ public class Chassis extends Submodule {
         mRightLeader.configOpenloopRamp(ChassisConstants.RAMP_RATE, Constants.TIMEOUT_MS);
         mRightLeader.configClosedloopRamp(0);
 
-        mLeftLeader.configContinuousCurrentLimit(30, Constants.TIMEOUT_MS);
-        mLeftLeader.configPeakCurrentLimit(80, Constants.TIMEOUT_MS);
-        mLeftLeader.configPeakCurrentDuration(1000, Constants.TIMEOUT_MS);
-        mRightLeader.configContinuousCurrentLimit(30, Constants.TIMEOUT_MS);
-        mRightLeader.configPeakCurrentLimit(80, Constants.TIMEOUT_MS);
-        mRightLeader.configPeakCurrentDuration(1000, Constants.TIMEOUT_MS);
+        mLeftLeader.configContinuousCurrentLimit(ChassisConstants.CONTINUOUS_CURRENT_LIMIT, Constants.TIMEOUT_MS);
+        mLeftLeader.configPeakCurrentLimit(ChassisConstants.PEAK_CURRENT_DURATION, Constants.TIMEOUT_MS);
+        mLeftLeader.configPeakCurrentDuration(ChassisConstants.PEAK_CURRENT_DURATION, Constants.TIMEOUT_MS);
+        mRightLeader.configContinuousCurrentLimit(ChassisConstants.CONTINUOUS_CURRENT_LIMIT, Constants.TIMEOUT_MS);
+        mRightLeader.configPeakCurrentLimit(ChassisConstants.PEAK_CURRENT_DURATION, Constants.TIMEOUT_MS);
+        mRightLeader.configPeakCurrentDuration(ChassisConstants.PEAK_CURRENT_DURATION, Constants.TIMEOUT_MS);
 
         /** Config Talon PID */
         // ! change !
@@ -181,8 +181,6 @@ public class Chassis extends Submodule {
 
         /** Config after imu init */
         trajectoryFollower = new TrajectoryFollower(ChassisConstants.DRIVE_KINEMATICS);
-        // leftVelController = new VelocityController(ChassisConstants.LEFT_kV, ChassisConstants.LEFT_kA, ChassisConstants.LEFT_kP);
-        // rightVelController = new VelocityController(ChassisConstants.RIGHT_kV, ChassisConstants.RIGHT_kA, ChassisConstants.RIGHT_kP);
         velocityController = new VelocityController(ChassisConstants.kS, ChassisConstants.kV, ChassisConstants.kA, ChassisConstants.kP);
         leftPrevVel = 0.0;
         rightPrevVel = 0.0;
@@ -198,9 +196,6 @@ public class Chassis extends Submodule {
         /** Camera */
         // UsbCamera cam1 =  CameraServer.startAutomaticCapture(0);
         // cam1.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-
-
-        // Logger.configureLoggingAndConfig(this, false);
     }
 
     @Override
@@ -238,8 +233,6 @@ public class Chassis extends Submodule {
         periodicIO.rightPosition = mRightLeader.getSelectedSensorPosition() * ChassisConstants.kEncoderDistancePerPulse;
 
         // ! change
-        // periodicIO.actualLeftVelocity = mLeftLeader.getSelectedSensorVelocity() * ChassisConstants.kEncoderDistancePerPulse * 10;
-        // periodicIO.actualRightVelocity = mRightLeader.getSelectedSensorVelocity() * ChassisConstants.kEncoderDistancePerPulse * 10;
         periodicIO.actualLeftVelocity = mLeftLeader.getSelectedSensorVelocity() * ChassisConstants.kEncoderDistancePerPulse;
         periodicIO.actualRightVelocity = mRightLeader.getSelectedSensorVelocity() * ChassisConstants.kEncoderDistancePerPulse;
 
@@ -264,8 +257,6 @@ public class Chassis extends Submodule {
             /** WHY DO I NEED TO MAKE THIS NEGATIVE!?! */
             double leftVel = -trajectoryFollower.update(updatedPose).leftMetersPerSecond;
             double rightVel = -trajectoryFollower.update(updatedPose).rightMetersPerSecond;
-            // double rightVel = trajectoryFollower.update(updatedPose).leftMetersPerSecond;
-            // double leftVel = trajectoryFollower.update(updatedPose).rightMetersPerSecond;
 
             /** Calculate accel */
             double leftAccel = leftVel - leftPrevVel;
@@ -276,8 +267,6 @@ public class Chassis extends Submodule {
             SmartDashboard.putNumber("desired left vel", -leftVel);
             SmartDashboard.putNumber("desired right vel", -rightVel);
 
-            // periodicIO.leftFF = leftVelController.updateFF(leftVel, leftAccel);
-            // periodicIO.rightFF = rightVelController.updateFF(rightVel, rightAccel);
             periodicIO.leftFF = velocityController.updateFF(leftVel, leftAccel);
             periodicIO.rightFF = velocityController.updateFF(rightVel, rightAccel);
 
@@ -295,8 +284,6 @@ public class Chassis extends Submodule {
 
         mLeftLeader.set(ControlMode.Disabled, 0.0);
         mRightLeader.set(ControlMode.Disabled, 0.0);
-
-        // compressor.changeState();
     }
 
     /**
@@ -423,8 +410,8 @@ public class Chassis extends Submodule {
     /**
      * Rescales an angle to [-180, 180]
      * 
-     * @param angle the angle to be rescalled
-     * @return rescalled angle
+     * @param angle the angle to be rescaled
+     * @return rescaled angle
      */
     private double rescale180(double angle) {
         return angle - 360.0 * Math.floor((angle + 180.0) * (1.0 / 360.0));

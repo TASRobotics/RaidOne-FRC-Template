@@ -6,8 +6,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import raidone.robot.auto.AutoRunner;
 import raidone.robot.submodules.Chassis;
-import raidone.robot.submodules.EZClimb;
-import raidone.robot.submodules.Intake;
+import raidone.robot.submodules.SubsystemX;
 // import raidone.robot.submodules.ChassisController;
 import raidone.robot.submodules.SubmoduleManager;
 import raidone.robot.submodules.Superstructure;
@@ -22,8 +21,7 @@ public class Robot extends TimedRobot {
 
     private static final Teleop teleop = Teleop.getInstance();
     private static final Chassis chassis = Chassis.getInstance();
-    private static final Intake intake = Intake.getInstance();
-    private static final EZClimb climb = EZClimb.getInstance();
+    private static final SubsystemX intake = SubsystemX.getInstance();
 
     private static final Superstructure superstructure = Superstructure.getInstance();
 
@@ -38,9 +36,7 @@ public class Robot extends TimedRobot {
         submoduleManager.setSubmodules(
             superstructure, 
             chassis, 
-            intake, 
-            climb
-            // chassisController
+            intake
         );
         submoduleManager.onInit();
 
