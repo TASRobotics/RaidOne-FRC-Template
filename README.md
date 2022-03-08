@@ -1,5 +1,2 @@
-# RaidOne-FRC-2022
-Todo: 
-- organize code
-- test code
-- get all the PID shenanigans working
+# RaidOne-FRC-Template
+- Requires Pathplanner to do pathing --> download from here: https://github.com/mjansen4857/pathplanner
