@@ -25,7 +25,6 @@ public class Teleop {
     private XboxController partner = new XboxController(1);
 
     private static Chassis chassis = Chassis.getInstance();
-    private static SubsystemX intake = SubsystemX.getInstance();
 
     /**
      * Runs at the start of teleop.

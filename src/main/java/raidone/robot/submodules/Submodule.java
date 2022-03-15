@@ -22,7 +22,7 @@ public abstract class Submodule {
      */
     public void update(double timestamp) {}
     
-    /**
+    /** 
      * Runs components in the submodule that have continuously changing 
      * inputs.
      */
